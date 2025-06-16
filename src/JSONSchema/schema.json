@@ -1,0 +1,77 @@
+{
+  "type":"object",
+  "properties": {
+    "textboxString": {
+      "type": "string",
+      "label": "Textbox String",
+      "name": "textboxString",
+      "rules": [
+        {
+          "validator": "{textboxString} == ''",
+          "message": "The textboxString is empty"
+        }
+      ],
+      "showIf": "{switch} == true"
+    },
+    "textboxNumber": {
+      "type": "number",
+      "label": "Textbox Number",
+      "name": "textboxNumber",
+      "showIf": "{switch} == true"
+    },
+    "dropdown": {
+      "ui:widget": "dropdown",
+      "type": "string",
+      "label": "Dropdown",
+      "name": "dropdown",
+      "enum": ["item1", "item2", "item3"]
+    },
+    "comboBox": {
+      "type": "array",
+      "label": "Combobox",
+      "name": "comboBox",
+      "items": {
+        "type": "string",
+        "enum": ["item1", "item2", "item3"]
+      }
+    },
+    "switch": {
+      "type": "boolean",
+      "label": "switch",
+      "name": "switch"
+    },
+    "radioButton": {
+      "ui:widget": "radio",
+      "type": "string",
+      "label": "Radio Button",
+      "name": "radioButton",
+      "enum": ["item1", "item2", "item3"]
+    },
+    "datePicker": {
+      "type": "string",
+      "format": "date",
+      "label": "Date Picker",
+      "name": "datePicker"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "switch": {"const": true}
+        }
+      },
+      "then": {
+        "properties": {
+          "textboxNumber": {
+            "type": "number",
+            "minimum": 5,
+            "maximum": 10
+          }
+        },
+        "required": ["textboxNumber"]
+      }
+    }
+  ]
+}
+
