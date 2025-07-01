@@ -1,10 +1,9 @@
 {
-  "type":"object",
+  "type": "object",
   "properties": {
     "textboxString": {
       "type": "string",
       "label": "Textbox String",
-      "name": "textboxString",
       "rules": [
         {
           "validator": "{textboxString} == ''",
@@ -16,7 +15,6 @@
     "textboxNumber": {
       "type": "number",
       "label": "Textbox Number",
-      "name": "textboxNumber",
       "showIf": "{switch} == true"
     },
     "dropdown": {
@@ -24,41 +22,94 @@
       "type": "string",
       "label": "Dropdown",
       "name": "dropdown",
-      "enum": ["item1", "item2", "item3"]
+      "enum": [
+        "item1",
+        "item2",
+        "item3"
+      ]
     },
     "comboBox": {
       "type": "array",
       "label": "Combobox",
-      "name": "comboBox",
       "items": {
         "type": "string",
-        "enum": ["item1", "item2", "item3"]
-      }
+        "enum": [
+          "item1",
+          "item2",
+          "item3"
+        ]
+      },
+      "showIf": "{switch} == true"
     },
     "switch": {
       "type": "boolean",
-      "label": "switch",
-      "name": "switch"
+      "label": "switch"
     },
     "radioButton": {
       "ui:widget": "radio",
       "type": "string",
       "label": "Radio Button",
-      "name": "radioButton",
-      "enum": ["item1", "item2", "item3"]
+      "enum": [
+        "item1",
+        "item2",
+        "item3"
+      ]
     },
     "datePicker": {
       "type": "string",
       "format": "date",
-      "label": "Date Picker",
-      "name": "datePicker"
+      "label": "Date Picker"
+    },
+    "additionalProps": {
+      "label": "Additional Props",
+      "type": "object",
+      "properties": {
+        "textboxString": {
+          "type": "string",
+          "label": "Textbox String",
+          "rules": [
+            {
+              "validator": "{additionalProps.textboxString} == ''",
+              "message": "The textboxString is empty"
+            }
+          ],
+          "showIf": "{additionalProps.switch} == true"
+        },
+        "switch": {
+          "type": "boolean",
+          "label": "switch"
+        },
+        "additionalProps2": {
+          "label": "Additional Props 2",
+          "type": "object",
+          "properties": {
+            "textboxString": {
+              "type": "string",
+              "label": "Textbox String 2",
+              "rules": [
+                {
+                  "validator": "{additionalProps.additionalProps2.textboxString} == ''",
+                  "message": "The textboxString is empty"
+                }
+              ],
+              "showIf": "{additionalProps.additionalProps2.switch} == true"
+            },
+            "switch": {
+              "type": "boolean",
+              "label": "switch"
+            }
+          }
+        }
+      }
     }
   },
   "allOf": [
     {
       "if": {
         "properties": {
-          "switch": {"const": true}
+          "switch": {
+            "const": true
+          }
         }
       },
       "then": {
@@ -67,11 +118,79 @@
             "type": "number",
             "minimum": 5,
             "maximum": 10
+          },
+          "comboBox": {
+            "minItems": 1,
+            "uniqueItems": true
           }
         },
-        "required": ["textboxNumber"]
+        "required": [
+          "textboxNumber",
+          "comboBox"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "additionalProps": {
+            "properties": {
+              "switch": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "additionalProps": {
+            "properties": {
+              "textboxString": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "textboxString"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "additionalProps": {
+            "properties": {
+              "additionalProps2": {
+                "properties": {
+                  "switch": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "additionalProps": {
+            "properties": {
+              "additionalProps2": {
+                "properties": {
+                  "textboxString": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "textboxString"
+                ]
+              }
+            }
+          }
+        }
       }
     }
   ]
 }
-

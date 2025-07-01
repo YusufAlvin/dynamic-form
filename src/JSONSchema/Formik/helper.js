@@ -13,17 +13,18 @@ export const initializeData = (schema) => {
   }
 
   switch (schema.type) {
-    case 'string': return '';
-    case 'number': return 0;
-    case 'array': return null;
+    case 'string': return undefined;
+    case 'number': return undefined;
+    case 'array': return [];
     case 'boolean': return false;
     default: return undefined;
   }
 };
 
 export const evaluateValidator = (expression, values) => {
-  const parsedExpr = expression.replace(/\{(\w+)\}/g, (_, field) => {
-    const val = getIn(values, field);
+  const pattern = /\{([\w.]+)\}/g;
+  const parsedExpr = expression.replace(pattern, (_, field) => {
+    const val = getIn(values, field.split('.'));
     if (typeof val === 'string') return `"${val}"`;
     if (val === undefined || val === null) return 'null';
     return val;

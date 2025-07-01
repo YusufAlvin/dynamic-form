@@ -8,62 +8,78 @@ import ComboBox from "./ComboBox";
 import DatePicker from "./DatePicker";
 import { shouldShowField } from "./helper";
 
-const DynamicInput = ({schema, values}) => {
-  const renderInput = (schema, path) => {
-    const newPath = path.join('.');
-    const uiWidget = schema['ui:widget'];
+const componentMap = {
+  string: {
+    default: TextboxString,
+    dropdown: Dropdown,
+    radio: RadioButton,
+    date: DatePicker,
+  },
+  number: {
+    default: TextboxNumber,
+  },
+  boolean: {
+    default: Switch,
+  },
+  array: {
+    default: ComboBox,
+  },
+};
 
-    switch (schema.type) {
-      case 'string': {
-        if (uiWidget === 'dropdown') {
-          return <Dropdown id={schema.name} label={schema.label} name={schema.name} path={newPath} items={schema.enum} />;
-        }
+const renderInput = (schema, path) => {
+  const newPath = path.join('.');
+  const { type, 'ui:widget': uiWidget, format } = schema;
 
-        if (uiWidget === 'radio') {
-          return <RadioButton id={schema.name} label={schema.label} name={schema.name} path={newPath} items={schema.enum} />
-        }
+  const componentType = componentMap[type];
+  if (!componentType) return null;
 
-        if (schema.format === 'date') {
-          return <DatePicker id={schema.name} label={schema.label} name={schema.name} />;
-        }
+  const Component =
+    (format && componentType[format]) ||
+    (uiWidget && componentType[uiWidget]) ||
+    componentType.default;
 
-        return <TextboxString id={schema.name} label={schema.label} name={schema.name} />;
-      }
-      case 'number': {
-        return <TextboxNumber id={schema.name} label={schema.label} name={schema.name} />;
-      }
-      case 'boolean': {
-        return <Switch id={schema.name} label={schema.label} name={schema.name} path={newPath} />
-      }
-      case 'array': {
-        return <ComboBox id={schema.name} label={schema.label} name={schema.name} path={newPath} items={schema.items.enum} />
-      }
-      default: return <></>
-    } 
-  }
+  if (!Component) return null;
 
-  const renderInputs = (schema, path = [], values) => {
-    if (schema.type === "object") {
-      return (
-        <>
-          {schema?.label && <h3>{schema.label}</h3>}
-          {Object.entries(schema.properties).map(([key, subschema]) => {
-            const show = shouldShowField(subschema, values);
-            if (!show) return null;
-
-            return (
-            <Fragment key={key}>
-              {renderInputs(subschema, [...path, key])}
-            </Fragment>
-          )})}
-        </>
-      );
-    }
-
-    return renderInput(schema, path);
+  const props = {
+    id: newPath,
+    name: newPath,
+    label: schema.label,
+    path: newPath,
   };
 
+  if (type === 'array') {
+    props.items = schema.items.enum;
+  } else if (schema.enum) {
+    props.items = schema.enum;
+  }
+
+  return <Component {...props} />;
+};
+
+const renderInputs = (schema, path = [], values) => {
+  if (schema.type === "object") {
+    return (
+      <>
+        {schema?.label && <strong>{schema.label}</strong>}
+        {Object.entries(schema.properties).map(([key, subschema]) => {
+          const show = shouldShowField(subschema, values);
+          if (!show) return null;
+
+          return (
+            <Fragment key={key}>
+              {renderInputs(subschema, [...path, key], values)}
+            </Fragment>
+          );
+        })}
+      </>
+    );
+  }
+
+  return renderInput(schema, path);
+};
+
+const DynamicInput = ({ schema, values }) => {
   return renderInputs(schema, [], values);
-}
+};
 
 export default DynamicInput
